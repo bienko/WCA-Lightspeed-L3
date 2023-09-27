@@ -1,0 +1,107 @@
+# Ansible Playbook for deploying WordPress on an AWS EC2 instance
+
+---
+# MODULE 1
+#   Deploy a new instance (VPC) of EC2 on AWS and prepare for installation of WordPress
+- name: Deploy AWS EC2 instance and WordPress
+  hosts: localhost
+  #   DEFINE variables associated with your personal AWS account and planned EC2 instance.
+  #   Replace variables indicated by <PLACEHOLDER> with AWS account details.
+  #   Do not include < > braces and do not enclose within parenthesis ('',"",etc.)
+  module_defaults:
+    group/aws:
+      aws_access_key: <PLACEHOLDER>
+      aws_secret_key: <PLACEHOLDER>
+      region: us-east-1 # adjust to your specific AWS region
+  
+  tasks:
+    # TASK 1
+    #   Creation of a virtual private cloud (VPC) named 'wordpress'.
+    #   Should have value 10.0.0.0/16 associated with cidr_block.
+    - name: Create VPC named wordpress
+
+    # TASK 2
+    #   Creation of the security group which allows traffic over SSH and HTTP/s
+    #   TCP ports 80-80, 443-443, 22-22
+    - name: Create and register wordpress_vpc VPC security group allow SSH and HTTP
+
+    # TASK 3
+    #   Creation of an internet gateway for the wordpress VPC
+    - name: Create internet gateway for VPC wordpress_vpc
+
+    # TASK 4
+    #   Creation of a network subnet for the wordpress VPC
+    - name: Create subnet in wordpress_vpc
+
+    # TASK 5
+    #   Creation of a routing table associated with wordpress VPC's subnet and internet gateway
+    - name: Create route table for subnet and gateway wordpress_igw
+
+    # TASK 6
+    #   Creation of an EC2 t2.small instance with attributes defined in Tasks 1-5
+    #   Amazon Machine Image (ami) image_id: ami-026ebd4cfe2c043b2
+    #   Registered to Red Hat Enterprise Linux 9 (HVM, 64-bit x86) image
+    #   Replace `key_name:` value with your EC2 .pem keypair - DO NOT include .pem as part of filename
+    #   Use 'chmod 400' to change file permissions of .pem file before executing Playbook
+    - name: Create t2.small instance named wordpress in wordpress_subnet assign public ip
+
+    # TASK 7
+    #   This section has been hard-coded ahead of time.
+    #   DO NOT regenerate using AI-suggested code.
+    #   Replace `ansible_ssh_private_key_file` value with path on local machine to SSH key — INCLUDE .pem as part of filename
+    #   Use 'chmod 400' to change file permissions of .pem file before executing Playbook
+    - name: Add host to inventory using tunnel using wordpress_instance public ip and ansible user ec2-user
+      ansible.builtin.add_host:
+        name: wordpress
+        ansible_host: "{{ wordpress_server.instances[0].public_ip_address }}"
+        ansible_user: ec2-user
+        ansible_ssh_private_key_file: "bienko-key.pem"
+
+# MODULE B
+#   Install and configure WordPress on the newly-provisioned AWS EC2 (VPC) instance.
+- name: Install and configure WordPress
+  hosts: wordpress
+  become: true
+  gather_facts: false
+  tasks:
+    # TASK 8
+    #   Wait for a connection to be established to the EC2 instance.
+    - name: Wait for connection
+
+    # TASK 9
+    #   After connecting, begin installation of necessary drivers and services.
+    - name: Install httpd, php, php-mysqli, and mariadb-server
+
+    # TASK 10
+    #   Download and decompress (unarchive) WordPress contents on EC2 instance.
+    - name: Download and unarchive wordpress
+
+    # TASK 11
+    #   Set owner attributes for WordPress environment.
+    - name: Change owner of /var/www/html/wordpress to apache:apache
+
+    # TASK 12
+    #   Deploy services installed in Task 9.
+    - name: Start and enable httpd, php-fpm and mariadb services
+
+# MODULE C
+#   Deploy WordPress on the newly-provisioned AWS EC2 (VPC) instance and host web page.
+- name: Gather ec2 host name
+  hosts: localhost
+  #   DEFINE variables associated with your personal AWS account and planned EC2 instance.
+  #   Replace variables indicated by <PLACEHOLDER> with AWS account details.
+  #   Do not include < > braces and do not enclose within parenthesis ('',"",etc.)
+  module_defaults:
+    group/aws:
+      aws_access_key: <PLACEHOLDER>
+      aws_secret_key: <PLACEHOLDER>
+      region: us-east-1 # adjust to your specific AWS region
+  
+  tasks:
+    # TASK 13
+    #   Gather facts about AWS EC2 (VPC) instance and deployed WordPress application.
+    - name: Gather ec2 instance info for tag name wordpress
+    
+    # TASK 14
+    #   Host the WordPress web application and make accessible to user.
+    - name: Debug ec2_facts public dns name
